@@ -1,14 +1,18 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Lambda3.ConvertAspxToRazor</id>
     <version>0.1</version>
-    <title />
+    <title>Recipe to Convert ASPXs to Razor</title>
     <authors>Giovanni Bassi</authors>
     <owners />
+    <projectUrl>https://bitbucket.org/giggio/teched2011mvc4recipes</projectUrl>
+    <iconUrl>http://www.lambda3.com.br/Content/images/logos/Lambda3.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Converts aspx views to razor views.</description>
     <summary />
+    <releaseNotes>Using Razor converter from Telerik (https://github.com/telerik/razor-converter) and the recipes sdk from Microsoft. Targeting the developer preview of ASP.NET MVC 4.</releaseNotes>
+    <tags>razor, aspx, recipe, mvc</tags>
   </metadata>
   <files>
     <file src="bin\Debug\ConvertAspxToRazorRecipe.dll" target="recipes\ConvertAspxToRazorRecipe.dll" />
