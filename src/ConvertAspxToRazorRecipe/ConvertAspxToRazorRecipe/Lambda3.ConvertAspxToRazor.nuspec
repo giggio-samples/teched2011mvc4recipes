@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Lambda3.ConvertAspxToRazor</id>
+    <version>0.1</version>
+    <title />
+    <authors>Giovanni Bassi</authors>
+    <owners />
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Converts aspx views to razor views.</description>
+    <summary />
+  </metadata>
+  <files>
+    <file src="bin\Debug\ConvertAspxToRazorRecipe.dll" target="recipes\ConvertAspxToRazorRecipe.dll" />
+    <file src="bin\Debug\Telerik.RazorConverter.dll" target="recipes\Telerik.RazorConverter.dll" />
+  </files>
+</package>
