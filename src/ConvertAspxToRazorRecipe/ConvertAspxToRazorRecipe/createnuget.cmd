@@ -10,5 +10,4 @@ copy ..\..\..\libs\Telerik.RazorConverter.dll ..\..\..\Package\Compile\bin\Debug
 copy Lambda3.ConvertAspxToRazor.nuspec ..\..\..\Package\Compile\
 
 ..\..\..\tools\ilmerge.exe /v4 /out:..\..\..\Package\Compile\bin\Debug\ConvertAspxToRazorRecipe.dll ..\..\..\Package\Compile\bin\Debug\ConvertAspxToRazorRecipe.original.dll ..\..\..\Package\Compile\bin\Debug\Telerik.RazorConverter.dll
-..\..\..\tools\nuget.exe pack ..\..\..\Package\Compile\Lambda3.ConvertAspxToRazor.nuspec -OutputDirectory ..\..\..\Package 
-rem -NoPackageAnalysis
+..\..\..\tools\nuget.exe pack ..\..\..\Package\Compile\Lambda3.ConvertAspxToRazor.nuspec -OutputDirectory ..\..\..\Package -NoPackageAnalysis

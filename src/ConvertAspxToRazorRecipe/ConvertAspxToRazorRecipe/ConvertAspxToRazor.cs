@@ -1,7 +1,10 @@
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.IO;
+using System.Resources;
 using System.Text;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using ConvertAspxToRazorRecipe.Properties;
 using Microsoft.VisualStudio.Web.Mvc.Extensibility;
 using Microsoft.VisualStudio.Web.Mvc.Extensibility.Recipes;
@@ -17,6 +20,10 @@ namespace ConvertAspxToRazorRecipe {
     public class ConvertAspxToRazor : IFolderRecipe {
         public bool Execute(ProjectFolder folder)
         {
+            var rm = new ResourceManager("ConvertAspxToRazorRecipe.g", typeof(Resources).Assembly);
+            var picker = new FilesPicker();
+            var window = new Window { Content = picker, SizeToContent = SizeToContent.WidthAndHeight, Icon = BitmapFrame.Create(rm.GetStream("lambda3.ico", Resources.Culture)) };
+            window.ShowDialog();
 
             var parser = new WebFormsParser(new WebFormsNodeFactory(), new WebFormsNodeFilterProvider(new WebFormsCodeGroupFactory()));
             var renderer = new RazorViewRenderer(new RazorNodeRendererProvider());
