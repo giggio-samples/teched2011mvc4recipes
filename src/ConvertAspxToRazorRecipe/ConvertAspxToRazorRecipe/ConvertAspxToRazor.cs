@@ -10,10 +10,30 @@ using ConvertAspxToRazorRecipe.Properties;
 using Microsoft.VisualStudio.Web.Mvc.Extensibility;
 using Microsoft.VisualStudio.Web.Mvc.Extensibility.Recipes;
 
-namespace ConvertAspxToRazorRecipe {
+namespace ConvertAspxToRazorRecipe
+{
     [Export(typeof(IRecipe))]
-    public class ConvertAspxToRazor : IFolderRecipe {
+    public class ConvertAspxToRazor : IFolderRecipe
+    {
         public bool Execute(ProjectFolder folder)
+        {
+            var candidateFilesToConvert = GetCandidateFilesToConvert(folder);
+            if (candidateFilesToConvert.Count == 0)
+            {
+                MessageBox.Show(
+                    "No files to convert. Check if you have already converted files and remove the existing cshtml files for the aspx's you want to convert.",
+                    "No files found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return true;
+            }
+
+            var filesToConvert = AskUserToSelectFiles(candidateFilesToConvert);
+            var convertedFiles = AspxToRazor.ConvertFiles(filesToConvert);
+            foreach (var convertedFile in convertedFiles)
+                folder.DteProjectItems.AddFromFile(convertedFile);
+            return true;
+        }
+
+        private static List<string> GetCandidateFilesToConvert(ProjectFolder folder)
         {
             var folderLoweredName = folder.FullName.ToLower();
             var razorFiles = (from f in folder.Files.Select(y => y.Name.ToLower())
@@ -27,28 +47,14 @@ namespace ConvertAspxToRazorRecipe {
             candidateFilesToConvert = (from f in candidateFilesToConvert
                                        where !razorFiles.Contains(f.ToLower().Substring(0, f.Length - 4) + "cshtml")
                                        select f).ToList();
-
-            if (candidateFilesToConvert.Count == 0)
-            {
-                MessageBox.Show(
-                    "No files to convert. Check if you have already converted files and remove the existing cshtml files for the aspx's you want to convert.",
-                    "No files found", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return true;
-            }
-
-            var filesToConvert = AskUserToSelectFiles(candidateFilesToConvert);
-            //return true;
-            var convertedFiles = AspxToRazor.ConvertFiles(filesToConvert);
-            foreach (var convertedFile in convertedFiles)
-                folder.DteProjectItems.AddFromFile(convertedFile);
-            return true;
+            return candidateFilesToConvert;
         }
 
         private static IEnumerable<string> AskUserToSelectFiles(IEnumerable<string> fileNamesToConvert)
         {
-            var rm = new ResourceManager("ConvertAspxToRazorRecipe.g", typeof (Resources).Assembly);
-            var filesToConvert = (from f in fileNamesToConvert select new FileToConvert {FullFileName = f, FileName = Path.GetFileName(f)}).ToList();
-            var picker = new FilesPicker{DataContext = filesToConvert};
+            var rm = new ResourceManager("ConvertAspxToRazorRecipe.g", typeof(Resources).Assembly);
+            var filesToConvert = (from f in fileNamesToConvert select new FileToConvert { FullFileName = f, FileName = Path.GetFileName(f) }).ToList();
+            var picker = new FilesPicker { DataContext = filesToConvert };
             var window = new Window
                              {
                                  Content = picker,
@@ -57,7 +63,7 @@ namespace ConvertAspxToRazorRecipe {
                                  Width = 400,
                                  Title = "Convert ASPX to Razor",
                                  MinHeight = picker.MinHeight + 50,
-                                 MinWidth = picker.MinWidth + 50 
+                                 MinWidth = picker.MinWidth + 50
                              };
             var result = window.ShowDialog();
             if (result != null && !result.Value)
@@ -74,19 +80,23 @@ namespace ConvertAspxToRazorRecipe {
         }
 
 
-        public bool IsValidTarget(ProjectFolder folder) {
-            return folder.IsMvcViewsFolderOrDescendent();
+        public bool IsValidTarget(ProjectFolder folder)
+        {
+            return folder.IsMvcViewsFolderOrDescendent() && GetCandidateFilesToConvert(folder).Count > 0;
         }
 
-        public string Description {
+        public string Description
+        {
             get { return "Converts Aspx files to Razor."; }
         }
 
-        public Icon Icon {
+        public Icon Icon
+        {
             get { return Resources.Lambda3; }
         }
 
-        public string Name {
+        public string Name
+        {
             get { return "Convert Aspx to Razor"; }
         }
     }
