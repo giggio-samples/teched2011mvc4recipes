@@ -12,7 +12,7 @@
     <description>Converts aspx views to razor views.</description>
     <summary />
     <releaseNotes>Using Razor converter from Telerik (https://github.com/telerik/razor-converter) and the recipes sdk from Microsoft. Targeting the developer preview of ASP.NET MVC 4.</releaseNotes>
-    <tags>razor, aspx, recipe, mvc</tags>
+    <tags>razor aspx recipe mvc</tags>
   </metadata>
   <files>
     <file src="bin\Debug\ConvertAspxToRazorRecipe.dll" target="recipes\ConvertAspxToRazorRecipe.dll" />
