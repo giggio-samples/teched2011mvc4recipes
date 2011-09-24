@@ -27,6 +27,15 @@ namespace ConvertAspxToRazorRecipe {
             candidateFilesToConvert = (from f in candidateFilesToConvert
                                        where !razorFiles.Contains(f.ToLower().Substring(0, f.Length - 4) + "cshtml")
                                        select f).ToList();
+
+            if (candidateFilesToConvert.Count == 0)
+            {
+                MessageBox.Show(
+                    "No files to convert. Check if you have already converted files and remove the existing cshtml files for the aspx's you want to convert.",
+                    "No files found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return true;
+            }
+
             var filesToConvert = AskUserToSelectFiles(candidateFilesToConvert);
             //return true;
             var convertedFiles = AspxToRazor.ConvertFiles(filesToConvert);
