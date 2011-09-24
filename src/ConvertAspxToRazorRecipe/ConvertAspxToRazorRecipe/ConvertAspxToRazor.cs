@@ -15,10 +15,20 @@ namespace ConvertAspxToRazorRecipe {
     public class ConvertAspxToRazor : IFolderRecipe {
         public bool Execute(ProjectFolder folder)
         {
-            
-            var candidateFilesToConvert = new List<string>(from f in folder.Files select Path.Combine(folder.FullName, f.Name));
-            //var candidateFilesToConvert = Directory.EnumerateFiles(@"c:\temp\");
+            var folderLoweredName = folder.FullName.ToLower();
+            var razorFiles = (from f in folder.Files.Select(y => y.Name.ToLower())
+                              where f.EndsWith("cshtml")
+                              select Path.Combine(folderLoweredName, f)).ToList();
+            var candidateFilesToConvert = (from f in folder.Files
+                                           where f.Name.ToLower().EndsWith("aspx")
+                                           select Path.Combine(folder.FullName, f.Name)).ToList();
+            //var razorFiles = Directory.EnumerateFiles(@"c:\temp\").Where(f => f.ToLower().EndsWith("cshtml")).Select(f => f.ToLower());
+            //var candidateFilesToConvert = Directory.EnumerateFiles(@"c:\temp\").Where(f => f.ToLower().EndsWith("aspx"));
+            candidateFilesToConvert = (from f in candidateFilesToConvert
+                                       where !razorFiles.Contains(f.ToLower().Substring(0, f.Length - 4) + "cshtml")
+                                       select f).ToList();
             var filesToConvert = AskUserToSelectFiles(candidateFilesToConvert);
+            //return true;
             var convertedFiles = AspxToRazor.ConvertFiles(filesToConvert);
             foreach (var convertedFile in convertedFiles)
                 folder.DteProjectItems.AddFromFile(convertedFile);
@@ -41,7 +51,7 @@ namespace ConvertAspxToRazorRecipe {
                                  MinWidth = picker.MinWidth + 50 
                              };
             var result = window.ShowDialog();
-            if (!result.Value)
+            if (result != null && !result.Value)
                 return new List<string>();
             var selectedFiles = (from f in filesToConvert where f.Checked select f.FullFileName).ToList();
             return selectedFiles;
