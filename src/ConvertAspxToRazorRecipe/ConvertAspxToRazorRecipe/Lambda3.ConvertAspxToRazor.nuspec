@@ -12,6 +12,5 @@
   </metadata>
   <files>
     <file src="bin\Debug\ConvertAspxToRazorRecipe.dll" target="recipes\ConvertAspxToRazorRecipe.dll" />
-    <file src="bin\Debug\Telerik.RazorConverter.dll" target="recipes\Telerik.RazorConverter.dll" />
   </files>
 </package>
