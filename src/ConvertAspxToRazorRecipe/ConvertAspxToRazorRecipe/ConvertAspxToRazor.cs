@@ -1,49 +1,59 @@
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Resources;
-using System.Text;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using ConvertAspxToRazorRecipe.Properties;
 using Microsoft.VisualStudio.Web.Mvc.Extensibility;
 using Microsoft.VisualStudio.Web.Mvc.Extensibility.Recipes;
-using Telerik.RazorConverter.Razor.Converters;
-using Telerik.RazorConverter.Razor.DOM;
-using Telerik.RazorConverter.Razor.Rendering;
-using Telerik.RazorConverter.WebForms.DOM;
-using Telerik.RazorConverter.WebForms.Filters;
-using Telerik.RazorConverter.WebForms.Parsing;
 
 namespace ConvertAspxToRazorRecipe {
     [Export(typeof(IRecipe))]
     public class ConvertAspxToRazor : IFolderRecipe {
         public bool Execute(ProjectFolder folder)
         {
-            var rm = new ResourceManager("ConvertAspxToRazorRecipe.g", typeof(Resources).Assembly);
-            var picker = new FilesPicker();
-            var window = new Window { Content = picker, SizeToContent = SizeToContent.WidthAndHeight, Icon = BitmapFrame.Create(rm.GetStream("lambda3.ico", Resources.Culture)) };
-            window.ShowDialog();
-
-            var parser = new WebFormsParser(new WebFormsNodeFactory(), new WebFormsNodeFilterProvider(new WebFormsCodeGroupFactory()));
-            var renderer = new RazorViewRenderer(new RazorNodeRendererProvider());
-            var converter = new WebFormsToRazorConverter(new RazorNodeConverterProvider(new RazorDirectiveNodeFactory(), new RazorSectionNodeFactory(), new RazorCodeNodeFactory(), new RazorTextNodeFactory(), new RazorCommentNodeFactory(), new RazorExpressionNodeFactory(), new ContentTagConverterConfiguration()));
-
-            foreach (var file in folder.Files)
-            {
-                var folderPath = folder.FullName;
-                var filePath = Path.Combine(folderPath, file.Name);
-
-                var webFormsPageSource = File.ReadAllText(filePath, Encoding.UTF8);
-                var webFormsDocument = parser.Parse(webFormsPageSource);
-                var razorDom = converter.Convert(webFormsDocument);
-                var razorPage = renderer.Render(razorDom);
-                var outputFileName = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(file.Name) + ".cshtml");
-                File.WriteAllText(outputFileName, razorPage, Encoding.UTF8);
-                folder.DteProjectItems.AddFromFile(outputFileName);
-            }
+            
+            var candidateFilesToConvert = new List<string>(from f in folder.Files select Path.Combine(folder.FullName, f.Name));
+            //var candidateFilesToConvert = Directory.EnumerateFiles(@"c:\temp\");
+            var filesToConvert = AskUserToSelectFiles(candidateFilesToConvert);
+            var convertedFiles = AspxToRazor.ConvertFiles(filesToConvert);
+            foreach (var convertedFile in convertedFiles)
+                folder.DteProjectItems.AddFromFile(convertedFile);
             return true;
         }
+
+        private static IEnumerable<string> AskUserToSelectFiles(IEnumerable<string> fileNamesToConvert)
+        {
+            var rm = new ResourceManager("ConvertAspxToRazorRecipe.g", typeof (Resources).Assembly);
+            var filesToConvert = (from f in fileNamesToConvert select new FileToConvert {FullFileName = f, FileName = Path.GetFileName(f)}).ToList();
+            var picker = new FilesPicker{DataContext = filesToConvert};
+            var window = new Window
+                             {
+                                 Content = picker,
+                                 SizeToContent = SizeToContent.Height,
+                                 Icon = BitmapFrame.Create(rm.GetStream("lambda3.ico", Resources.Culture)),
+                                 Width = 400,
+                                 Title = "Convert ASPX to Razor",
+                                 MinHeight = picker.MinHeight + 50,
+                                 MinWidth = picker.MinWidth + 50 
+                             };
+            var result = window.ShowDialog();
+            if (!result.Value)
+                return new List<string>();
+            var selectedFiles = (from f in filesToConvert where f.Checked select f.FullFileName).ToList();
+            return selectedFiles;
+        }
+
+        private class FileToConvert
+        {
+            public string FullFileName { get; set; }
+            public string FileName { get; set; }
+            public bool Checked { get; set; }
+        }
+
 
         public bool IsValidTarget(ProjectFolder folder) {
             return folder.IsMvcViewsFolderOrDescendent();
